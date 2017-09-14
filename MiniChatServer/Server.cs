@@ -9,17 +9,30 @@ using System.Threading.Tasks;
 
 namespace MiniChatServer
 {
-    class Server
+    public class Server
     {
 
         public void Start()
         {
             TcpListener server = new TcpListener(IPAddress.Loopback, 7070);
             server.Start();
+
+            while (true)
+            {
+                TcpClient socket = server.AcceptTcpClient();
+                Task.Run(() =>
+                {
+                    TcpClient LocalSocket = socket;
+                    DoClient(LocalSocket);
+                });
+            }
+        }
+
+        public void DoClient(TcpClient socket)
+        {
             string line = "";
             string myLine = "";
 
-            using (TcpClient socket = server.AcceptTcpClient())
             using (NetworkStream ns = socket.GetStream())
             using (StreamReader sr = new StreamReader(ns))
             using (StreamWriter sw = new StreamWriter(ns))
